@@ -25,8 +25,7 @@ telemetry *modules* and *initializers* for automatically tracking telemetry from
 adjusting the configuration file, you can enable or disable telemetry modules and initializers, and set parameters for
 some of them.
 
-The configuration file is named `ApplicationInsights.config` or `ApplicationInsights.xml`, depending on the type of your
-application. It is automatically added to your project when you [install most versions of the SDK][start]. It is also added to a web app
+The configuration file is named `ApplicationInsights.config` or `ApplicationInsights.xml`, depending on the type of your application. It is automatically added to your project when you [install most versions of the SDK][start]. It is also added to a web app
 by [Status Monitor on an IIS server][redfield], or when you select the Application Insights
 [extension for an Azure website or VM](app-insights-azure-web-apps.md).
 
@@ -57,12 +56,18 @@ You can also write your own dependency tracking code using the [TrackDependency 
 * [Microsoft.ApplicationInsights.PerfCounterCollector](http://www.nuget.org/packages/Microsoft.ApplicationInsights.PerfCounterCollector) NuGet package.
 
 ### Application Insights Diagnostics Telemetry
-The `DiagnosticsTelemetryModule` reports errors in the Application Insights instrumentation code itself. For example,
-if the code cannot access performance counters or if an `ITelemetryInitializer` throws an exception. Trace telemetry
-tracked by this module appears in the [Diagnostic Search][diagnostic]. Sends diagnostic data to dc.services.vsallin.net.
+The `DiagnosticsTelemetryModule` works at the Application Insights tooling level exclusively. The two things that it will emit will be (1) reporting errors in the Application Insights instrumentation code itself, and (2) report a 'heartbeat' to aid in diagnostic efforts.
 
-* `Microsoft.ApplicationInsights.Extensibility.Implementation.Tracing.DiagnosticsTelemetryModule`
-* [Microsoft.ApplicationInsights](http://www.nuget.org/packages/Microsoft.ApplicationInsights) NuGet package. If you only install this package, the ApplicationInsights.config file is not automatically created.
+When reporting errors, for example, if the code cannot access performance counters or if an `ITelemetryInitializer` throws an exception. Trace telemetry tracked by this module appears in the Diagnostic Search. Sends diagnostic data to dc.services.vsallin.net.+
+
+The heartbeat information is set to send a minimal amount of data to track general health information on your application as it would pertain to the Application Insights tooling itself. It will log information like platform versions, SDK versions, and other such data, and is open to extension should your application have specific heartbeat requirements. 
+
+The data is sent at very infrequent and configurable intervals and is by default sent once every 15 minutes. All data would be stored with your application telemetry and can be queried and used for support or other purposes later.
+
+- `Microsoft.ApplicationInsights.Extensibility.Implementation.Tracing.DiagnosticsTelemetryModule`
+- `Microsoft.ApplicationInsights` NuGet package. If you only install this package, the `ApplicationInsights.config` file is not automatically created
+
+> Note: Heartbeat functionality was introduced in version 2.5.1.
 
 ### Developer Mode
 `DeveloperModeWithDebuggerAttachedTelemetryModule` forces the Application Insights `TelemetryChannel` to send data immediately, one telemetry item at a time, when a debugger is attached to the application process. This reduces the amount of time between the moment when your application tracks telemetry and when it appears on the Application Insights portal. It causes significant overhead in CPU and network bandwidth.
